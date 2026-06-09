@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor Licitaciones — Francisco Oliver Arquitectos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+  :root {
+    --bg:#0f0f0f;--bg2:#161616;--bg3:#1e1e1e;--border:#2a2a2a;--border2:#363636;
+    --text:#e8e8e8;--text2:#888;--text3:#555;--accent:#c8ff00;--accent2:#00c8ff;
+    --pub:#c8ff00;--adj:#00c8ff;--cerr:#ff6b35;--des:#666;--sus:#ffaa00;
+    --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+  header{border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:baseline;justify-content:space-between;}
+  header h1{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;}
+  header span{font-family:var(--mono);font-size:11px;color:var(--text3);}
+  .main{max-width:1000px;margin:0 auto;padding:28px 32px;}
+  .config-panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:20px 24px;margin-bottom:24px;}
+  .config-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+  .field label{display:block;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+  .field input,.field select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color .15s;}
+  .field input:focus,.field select:focus{border-color:var(--accent);}
+  .field select option{background:var(--bg3);}
+  .tags-wrap{background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:6px 8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:40px;cursor:text;}
+  .tags-wrap:focus-within{border-color:var(--accent);}
+  .tag{display:inline-flex;align-items:center;gap:5px;background:#1a2200;border:1px solid #3a5200;color:var(--accent);font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:2px;}
+  .tag button{background:none;border:none;color:inherit;cursor:pointer;font-size:13px;line-height:1;opacity:.6;padding:0;}
+  .tag button:hover{opacity:1;}
+  .tags-wrap input{background:none;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:12px;flex:1;min-width:120px;}
+  .tipo-toggles{display:flex;gap:8px;flex-wrap:wrap;}
+  .tipo-toggle{font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:2px;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);cursor:pointer;transition:all .15s;user-select:none;}
+  .tipo-toggle.on{background:#1a2200;border-color:#3a5200;color:var(--accent);}
+  .tipo-toggle:hover{border-color:var(--border2);color:var(--text2);}
+  .tipo-toggle.on:hover{border-color:#558800;}
+  .btn-run{width:100%;background:var(--accent);color:#0f0f0f;border:none;border-radius:3px;padding:11px;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:opacity .15s;margin-top:4px;}
+  .btn-run:hover{opacity:.88;}
+  .btn-run:disabled{opacity:.4;cursor:not-allowed;}
+  .progress-wrap{margin-bottom:20px;display:none;}
+  .progress-label{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px;}
+  .progress-bar-bg{background:var(--bg3);border-radius:2px;height:3px;overflow:hidden;}
+  .progress-bar{height:3px;background:var(--accent);border-radius:2px;transition:width .2s;width:0%;}
+  .metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+  .metric{background:var(--bg2);padding:14px 16px;text-align:center;}
+  .metric .n{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--accent);display:block;line-height:1;margin-bottom:4px;}
+  .metric .n.blue{color:var(--accent2);}
+  .metric .lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;}
+  .section-title{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 18px 14px 22px;margin-bottom:8px;transition:border-color .15s;position:relative;}
+  .card:hover{border-color:var(--border2);}
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;}
+  .card-title{font-size:13px;font-weight:400;color:var(--text);line-height:1.45;flex:1;}
+  .tipo-badge{font-family:var(--mono);font-size:10px;font-weight:500;padding:3px 8px;border-radius:2px;white-space:nowrap;flex-shrink:0;}
+  .tbLP{background:#1a2200;color:var(--accent);border:1px solid #3a5200;}
+  .tbLE{background:#001a22;color:var(--accent2);border:1px solid #003a52;}
+  .tbOTRO{background:var(--bg3);color:var(--text3);border:1px solid var(--border2);}
+  .card-meta{display:flex;flex-wrap:wrap;gap:10px 16px;font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;}
+  .estado-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:2px;text-transform:uppercase;letter-spacing:.06em;}
+  .e-pub{background:#1a2200;color:var(--pub);}
+  .e-adj{background:#001a22;color:var(--adj);}
+  .e-cerr{background:#221500;color:var(--cerr);}
+  .e-des{background:var(--bg3);color:var(--des);}
+  .e-sus{background:#221a00;color:var(--sus);}
+  .e-rev{background:#220000;color:#ff4444;}
+  .match-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+  .match-chip{font-family:var(--mono);font-size:10px;padding:2px 6px;background:#13140a;border:1px solid #2a2c14;color:#aacc44;border-radius:2px;}
+  .card-link{font-family:var(--mono);font-size:10px;color:var(--text3);text-decoration:none;transition:color .15s;}
+  .card-link:hover{color:var(--accent2);}
+  .age-bar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:4px 0 0 4px;}
+  .age-fresh{background:var(--accent);}
+  .age-mid{background:#558800;}
+  .age-old{background:var(--border2);}
+  .empty{text-align:center;padding:48px 16px;color:var(--text3);font-family:var(--mono);font-size:12px;line-height:2;}
+  .error-box{background:#220000;border:1px solid #440000;border-radius:4px;padding:12px 16px;color:#ff8888;font-family:var(--mono);font-size:12px;margin-bottom:16px;}
+  .spinner{display:inline-block;width:12px;height:12px;border:1.5px solid #444;border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:-1px;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .dias-fresh{color:var(--accent);}
+  .dias-mid{color:#88aa33;}
+  @media(max-width:700px){.config-row{grid-template-columns:1fr;}.metrics{grid-template-columns:repeat(2,1fr);}.main{padding:16px;}header{padding:14px 16px;}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Monitor · Licitaciones MP</h1>
+  <span id="ts">Francisco Oliver Arquitectos Ltda.</span>
+</header>
+
+<div class="main">
+  <div class="config-panel">
+    <div class="config-row" style="grid-template-columns:1fr;">
+      <div class="field">
+        <label>Ticket API Mercado Público</label>
+        <input type="password" id="ticket" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div class="field" style="margin-bottom:10px;">
+        <label>Tipos de licitación (activar / desactivar)</label>
+        <div class="tipo-toggles" id="tipo-toggles"></div>
+      </div>
+      <div class="field">
+        <label>Palabras clave (Enter para agregar)</label>
+        <div class="tags-wrap" id="tags-wrap" onclick="document.getElementById('tag-input').focus()">
+          <input id="tag-input" placeholder="+ agregar palabra clave…" onkeydown="addTag(event)" />
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-run" id="btn-run" onclick="buscar()">Consultar licitaciones</button>
+  </div>
+
+  <div id="error-box" class="error-box" style="display:none;"></div>
+
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-label" id="progress-label">Consultando…</div>
+    <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar"></div></div>
+  </div>
+
+  <div id="metricas" style="display:none;margin-bottom:20px;">
+    <div class="metrics">
+      <div class="metric"><span class="n" id="m-api">0</span><div class="lbl">Total período</div></div>
+      <div class="metric"><span class="n" id="m-tipo">0</span><div class="lbl">Tipo seleccionado</div></div>
+      <div class="metric"><span class="n" id="m-match">0</span><div class="lbl">Con palabras clave</div></div>
+      <div class="metric"><span class="n" id="m-pub">0</span><div class="lbl">Publicadas</div></div>
+      <div class="metric"><span class="n blue" id="m-dias">0</span><div class="lbl">Activas hoy</div></div>
+    </div>
+  </div>
+
+  <div id="resultados"></div>
+</div>
+
+<script>
+const TODOS_TIPOS = ['LP','LE','L1','LQ','CO','E2','LS'];
+let tags = ['diseño','construccion','const.','consultoria','mejoramiento','cosam','cesfam','plaza','parque','centro comunal','infraestructura','espacio publico','acera','veredas','rehabilitacion','habilitacion','equipamiento','arquitectura'];
+let tiposActivos = new Set(['LP','LE']);
+
+function renderTipos() {
+  const wrap = document.getElementById('tipo-toggles');
+  wrap.innerHTML = '';
+  TODOS_TIPOS.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tipo-toggle' + (tiposActivos.has(t) ? ' on' : '');
+    btn.textContent = t;
+    btn.onclick = () => { tiposActivos.has(t) ? tiposActivos.delete(t) : tiposActivos.add(t); renderTipos(); };
+    wrap.appendChild(btn);
+  });
+  const btnTodos = document.createElement('button');
+  btnTodos.className = 'tipo-toggle' + (tiposActivos.size === TODOS_TIPOS.length ? ' on' : '');
+  btnTodos.textContent = 'todos';
+  btnTodos.onclick = () => {
+    tiposActivos = tiposActivos.size === TODOS_TIPOS.length ? new Set(['LP','LE']) : new Set(TODOS_TIPOS);
+    renderTipos();
+  };
+  wrap.appendChild(btnTodos);
+}
+
+function renderTags() {
+  const wrap = document.getElementById('tags-wrap');
+  const input = document.getElementById('tag-input');
+  wrap.innerHTML = '';
+  tags.forEach((t, i) => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.innerHTML = t + '<button onclick="removeTag(' + i + ')" title="Eliminar">×</button>';
+    wrap.appendChild(span);
+  });
+  wrap.appendChild(input);
+}
+
+function addTag(e) {
+  if (e.key === 'Enter') {
+    const v = e.target.value.trim().toLowerCase();
+    if (v && !tags.includes(v)) tags.push(v);
+    e.target.value = '';
+    renderTags();
+    e.preventDefault();
+  }
+}
+
+function removeTag(i) { tags.splice(i,1); renderTags(); }
+
+function getTipo(codigo) {
+  const m = (codigo||'').match(/-([A-Z]+)\d+$/);
+  return m ? m[1] : null;
+}
+
+function normalizar(str) {
+  return (str||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9 ]/g,' ');
+}
+
+function matchKeywords(nombre) {
+  const txt = normalizar(nombre);
+  const found = tags.filter(t => txt.includes(normalizar(t)));
+  return { match: found.length > 0, found };
+}
+
+function fmtDisplay(str) {
+  if (!str) return '—';
+  const d = str.substring(0,10).split('-');
+  return d.length < 3 ? str.substring(0,10) : d[2]+'/'+d[1]+'/'+d[0];
+}
+
+function tipoClass(t) { if(t==='LP') return 'tbLP'; if(t==='LE') return 'tbLE'; return 'tbOTRO'; }
+function showError(msg) { const b=document.getElementById('error-box'); b.innerHTML=msg; b.style.display='block'; }
+function hideError() { document.getElementById('error-box').style.display='none'; }
+function setProgress(msg, pct) {
+  document.getElementById('progress-label').textContent = msg;
+  document.getElementById('progress-bar').style.width = pct+'%';
+}
+
+function fmtAPIhoy() {
+  const d = new Date();
+  return String(d.getDate()).padStart(2,'0') + String(d.getMonth()+1).padStart(2,'0') + d.getFullYear();
+}
+
+function jsonp(url, timeout=12000) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_mp_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const t = setTimeout(() => {
+      delete window[cbName];
+      if (s.parentNode) s.parentNode.removeChild(s);
+      reject(new Error('timeout'));
+    }, timeout);
+    window[cbName] = (data) => {
+      clearTimeout(t);
+      delete window[cbName];
+      if (s.parentNode) s.parentNode.removeChild(s);
+      resolve(data);
+    };
+    const s = document.createElement('script');
+    s.src = url + '&callback=' + cbName;
+    s.onerror = () => { clearTimeout(t); delete window[cbName]; reject(new Error('error de red')); };
+    document.head.appendChild(s);
+  });
+}
+
+async function buscar() {
+  hideError();
+  const ticket = document.getElementById('ticket').value.trim();
+  if (!ticket) { showError('Ingresa tu ticket de API.'); return; }
+  if (tiposActivos.size === 0) { showError('Selecciona al menos un tipo de licitación.'); return; }
+  if (tags.length === 0) { showError('Agrega al menos una palabra clave.'); return; }
+
+  const btn = document.getElementById('btn-run');
+  btn.innerHTML = '<span class="spinner"></span>Consultando…';
+  btn.disabled = true;
+  document.getElementById('resultados').innerHTML = '';
+  document.getElementById('metricas').style.display = 'none';
+
+  const pw = document.getElementById('progress-wrap');
+  pw.style.display = 'block';
+  setProgress('Consultando licitaciones de hoy…', 30);
+
+  let listado = [];
+  try {
+    const url = `https://api.mercadopublico.cl/servicios/v1/publico/licitaciones.jsonp?fecha=${fmtAPIhoy()}&estado=publicada&ticket=${encodeURIComponent(ticket)}`;
+    const data = await jsonp(url);
+    listado = data.Listado || [];
+  } catch(err) {
+    showError('Error al consultar la API: ' + err.message + '. Verifica tu ticket o intenta más tarde.');
+    btn.innerHTML = 'Consultar licitaciones'; btn.disabled = false; pw.style.display = 'none';
+    return;
+  }
+
+  setProgress('Aplicando filtros…', 80);
+
+  // Filtro tipo
+  const porTipo = listado.filter(item => {
+    const t = getTipo(item.CodigoExterno || item.Codigo);
+    return t && tiposActivos.has(t);
+  });
+
+  // Filtro keywords sobre nombre
+  const conMatch = porTipo.map(item => {
+    const r = matchKeywords(item.Nombre);
+    return {...item, _found: r.found, _match: r.match};
+  }).filter(i => i._match);
+
+  pw.style.display = 'none';
+
+  document.getElementById('m-api').textContent = listado.length;
+  document.getElementById('m-tipo').textContent = porTipo.length;
+  document.getElementById('m-match').textContent = conMatch.length;
+  document.getElementById('m-pub').textContent = conMatch.length;
+  document.getElementById('m-dias').textContent = new Date().toLocaleDateString('es-CL');
+  document.getElementById('metricas').style.display = 'block';
+
+  const cont = document.getElementById('resultados');
+
+  if (!conMatch.length) {
+    cont.innerHTML = `<div class="empty">— sin resultados —<br>
+      ${listado.length} licitaciones hoy · ${porTipo.length} de tipo ${[...tiposActivos].join('/')} · ninguna coincide con las palabras clave<br><br>
+      Puedes ampliar los tipos o agregar más palabras clave.</div>`;
+    btn.innerHTML = 'Consultar licitaciones'; btn.disabled = false;
+    return;
+  }
+
+  cont.innerHTML = '<div class="section-title">' + conMatch.length + ' licitación' + (conMatch.length !== 1 ? 'es' : '') + ' publicadas hoy con coincidencia</div>';
+
+  conMatch.forEach(item => {
+    const tipo = getTipo(item.CodigoExterno || item.Codigo) || '—';
+    const codigo = item.CodigoExterno || item.Codigo || '';
+    const cierre = fmtDisplay(item.FechaCierre);
+    const chips = item._found.map(t => '<span class="match-chip">' + t + '</span>').join('');
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="card-title">${item.Nombre || 'Sin nombre'}</div>
+        <span class="tipo-badge ${tipoClass(tipo)}">${tipo}</span>
+      </div>
+      <div class="card-meta">
+        ${codigo ? '<span style="color:var(--text3);">' + codigo + '</span>' : ''}
+        ${cierre !== '—' ? '<span>cierre ' + cierre + '</span>' : ''}
+      </div>
+      ${chips ? '<div class="match-chips">' + chips + '</div>' : ''}
+      ${codigo ? '<a class="card-link" href="https://www.mercadopublico.cl/Procurement/Modules/RFB/DetailsAcquisition.aspx?idlicitacion=' + codigo + '" target="_blank">↗ ver ficha en mercadopublico.cl</a>' : ''}
+    `;
+    cont.appendChild(card);
+  });
+
+  btn.innerHTML = 'Consultar licitaciones';
+  btn.disabled = false;
+}
+
+// Init
+document.getElementById('ts').textContent = 'Francisco Oliver Arquitectos · ' + new Date().toLocaleDateString('es-CL');
+renderTipos();
+renderTags();
+</script>
+</body>
+</html>
